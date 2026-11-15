@@ -18,14 +18,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Extract the recovered site
+        id: extract
         run: |
           mkdir -p site
           unzip -q examstudio-source.zip -d site
-          test -f site/dist/index.html
+          INDEX_FILE="$(find site -type f -path '*/dist/index.html' -print -quit)"
+          test -n "$INDEX_FILE"
+          echo "dist_dir=${INDEX_FILE%/index.html}" >> "$GITHUB_OUTPUT"
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: site/dist
+          path: ${{ steps.extract.outputs.dist_dir }}
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
